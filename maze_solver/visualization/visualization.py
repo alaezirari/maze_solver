@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from math import pi
+import pandas as pd
 
 
 def plot_step_metrics(df):
@@ -61,3 +62,55 @@ for algorithme in df["algorithm"].unique():
     )  # legende a lexterieur du graphique
     plt.tight_layout()  # ajustement pour eviterde couper la legende
     plt.show()
+
+
+def plot_performance_comparison(stats):
+    fig, axes = plt.subplots(1, 3, figsize=(18, 5))
+    metrics = ["time", "memory", "path_length"]
+    for i, metric in enumerate(metrics):
+        means = stats[(metric, "mean")]
+        stds = stats[(metric, "std")]
+
+        axes[i].bar(stats.index, means, yerr=stds, capsize=5)
+        axes[i].set_title(f"{metric} Comparison")
+        axes[i].set_ylabel(metric)
+        axes[i].set_xticks("algorithm")
+        axes[i].grid(True)
+    plt.tight_layout()
+    plt.show()
+
+
+def plot_boxplots(df):
+    import seaborn as sns
+
+    fig, axes = plt.subplots(1, 3, figsize=(20, 6))
+    sns.boxplot(x="algorithm", y="time", data=df, ax=axes[0], palette="Set3")
+    axes[0].set_title("Boxplot of time", fontsize=14)
+    axes[0].set_xlabel("Algorithm")
+    axes[0].set_ylabel("Time")
+    axes[0].grid(True, linestyle="--", alpha=0.6)
+
+    sns.boxplot(x="algorithm", y="memory", data=df, ax=axes[1], palette="Set3")
+    axes[1].set_title("Boxplot of memory", fontsize=14)
+    axes[1].set_xlabel("Algorithm")
+    # axes[1].set_ylabel[0,40])
+    axes[1].set_ylabel("Memory (KB)")
+    axes[1].grid(True, linestyle="--", alpha=0.6)
+
+    sns.boxplot(x="algorithm", y="path_length", data=df, ax=axes[2], palette="Set3")
+    axes[2].set_title("Boxplot of path length", fontsize=14)
+    axes[2].set_xlabel("Algorithm")
+    axes[2].set_ylabel("Path Length")
+    axes[2].grid(True, linestyle="--", alpha=0.6)
+
+    # plt.tight_layout()
+    plt.show()
+
+    def plot_pie_chart(stats):
+        metrics = ["time", "memory", "path_length"]
+        fig, axes = plt.subplots(1, 3, figsize=(18, 6))
+
+        for i, metric in enumerate(metrics):
+            means = stats[(metric, "mean")]
+            axes[i].pie(means, labels=stats.index, autopct="%1.1f%%", startangle=140)
+            axes[i].set_title(f"{metric} Distribution")

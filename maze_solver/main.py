@@ -1,30 +1,68 @@
-# example usage
-from configmaze import config_maze
+import time
+import tracemalloc
 
-width = 100
-height = 10
-start = (0, 0)
-goal = (9, 9)
+import pandas as pd
+import numpy as np
 
+import matplotlib.pyplot as plt
+from collections import deque
+import heapq
 
-def initialize_path(path, width, height):
-    i, j = 0, 0
-    for i in range(0, height // 2):
-        path.append((i, j))
+from math import pi
 
-    for j in range(0, int(width / 2)):
-        path.append((i, j))
-    for i in range(0, height // 2):
-        path.append((i, j))
-    for j in range(width // 2, width - 1):
-        path.append((0, j))
-    for i in range(0, height):
-        path.append(
-            (i, width - 1)
-        )  # attentin: width-1 and not width because of initialization!!
-    return path
+from visualization import (
+    plot_step_metrics,
+    plot_radar_chart,
+    plot_box_plot,
+    plot_pie_chart,
+    plot_performance_comparison,
+    plot_pie_charts,
+    plot_performance_comparison,
+)
+from algorithms import *
+from configmaze import width, height, start, goal, maze
 
 
-path = []
-path = initialize_path(path, width, height)
-maze = config_maze.generate_maze(width, height, path, start, goal)
+def run_experiment(algorithms, runs=100):
+    results = []
+    for name, algo in algorithms.items():
+        for _ in range(runs):
+            path, metrics = algo(start, goal)
+            results.append(
+                {
+                    "algorithm": name,
+                    "time": metrics["time"][-1],
+                    "memory": metrics["memory"][-1],
+                    "path_length": len(path),
+                    "steps times": metrics["time"],
+                    "steps memory": metrics["memory"],
+                }
+            )
+    return pd.DataFrame(results)
+
+
+if __name__ == "__main__":
+    # configurer les algorithmes
+    algorithms = {
+        "BFS": lambda s, g: bfs(s, g, maze),
+        "DFS": lambda s, g: dfs(s, g, maze),
+        "A*": lambda s, g: a_star(s, g, maze, heuristic),
+        "GBFS": lambda s, g: gbfs(s, g, maze, heuristic),
+    }
+    # executer les expériences
+    df_results = run_experiment(algorithms)
+    # analyse statistique
+    stats = df.groupby("algorithm").agg(
+        {
+            "time": ["mean", "std"],
+            "memory": ["mean", "std"],
+            "path_length": ["mean", "std"],
+        }
+    )
+    print(stats)
+    # genérer les visualisations
+    plot_step_metrics(df)
+    plot_radar_chart(df)
+    plot_box_plot(df)
+    plot_pie_chart(stats)
+    plot_performance_comparison(stats)
